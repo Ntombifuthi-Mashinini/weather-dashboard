@@ -51,16 +51,42 @@ function App() {
           )}
           
           {weather && !loading && (
-            <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-800 mb-2">
-                {weather.name}
-              </h2>
-              <p className="text-6xl font-bold text-blue-600 my-4">
-                {Math.round(weather.main.temp)}°C
-              </p>
-              <p className="text-xl text-gray-600 capitalize">
-                {weather.weather[0].description}
-              </p>
+            <div>
+              <div className="text-center mb-6">
+                <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                  {weather.name}, {weather.sys.country}
+                </h2>
+                <p className="text-6xl font-bold text-blue-600 my-4">
+                  {Math.round(weather.main.temp)}°C
+                </p>
+                <p className="text-xl text-gray-600 capitalize mb-2">
+                  {weather.weather[0].description}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Feels like {Math.round(weather.main.feels_like)}°C
+                </p>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t">
+                <div className="text-center">
+                  <p className="text-gray-500 text-sm">Humidity</p>
+                  <p className="text-2xl font-semibold text-gray-800">
+                    {weather.main.humidity}%
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-gray-500 text-sm">Wind Speed</p>
+                  <p className="text-2xl font-semibold text-gray-800">
+                    {weather.wind.speed} m/s
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-gray-500 text-sm">Pressure</p>
+                  <p className="text-2xl font-semibold text-gray-800">
+                    {weather.main.pressure} hPa
+                  </p>
+                </div>
+              </div>
             </div>
           )}
         </div>
