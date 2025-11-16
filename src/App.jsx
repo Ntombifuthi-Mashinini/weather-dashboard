@@ -145,6 +145,15 @@ function App() {
     return '🌤️';
   };
 
+  const formatTime = (timestamp) => {
+    const date = new Date(timestamp * 1000);
+    return date.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true 
+    });
+  };
+
   const getDailyForecasts = () => {
     if (!forecast) return [];
     
@@ -188,7 +197,7 @@ function App() {
           </button>
         </div>
         
-    
+  
         <div className={`rounded-lg shadow-lg p-6 mb-6 ${
           darkMode ? 'bg-gray-800' : 'bg-white'
         }`}>
@@ -253,7 +262,7 @@ function App() {
           )}
         </div>
 
-        
+      
         <div className={`rounded-lg shadow-lg p-6 mb-6 ${
           darkMode ? 'bg-gray-800' : 'bg-white'
         }`}>
@@ -302,9 +311,32 @@ function App() {
                 </p>
               </div>
 
-              <div className={`grid grid-cols-3 gap-4 mt-6 pt-6 border-t ${
+              <div className={`grid grid-cols-2 gap-4 mb-6 pb-6 border-b ${
                 darkMode ? 'border-gray-700' : 'border-gray-200'
               }`}>
+                <div className="text-center">
+                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    🌅 Sunrise
+                  </p>
+                  <p className={`text-xl font-semibold ${
+                    darkMode ? 'text-white' : 'text-gray-800'
+                  }`}>
+                    {formatTime(weather.sys.sunrise)}
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    🌇 Sunset
+                  </p>
+                  <p className={`text-xl font-semibold ${
+                    darkMode ? 'text-white' : 'text-gray-800'
+                  }`}>
+                    {formatTime(weather.sys.sunset)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
                 <div className="text-center">
                   <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                     Humidity
@@ -340,7 +372,7 @@ function App() {
           )}
         </div>
 
-      
+  
         {forecast && !loading && (
           <div className={`rounded-lg shadow-lg p-6 ${
             darkMode ? 'bg-gray-800' : 'bg-white'
