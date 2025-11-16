@@ -10,7 +10,8 @@ function App() {
   const [gettingLocation, setGettingLocation] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
 
-  const API_KEY = '1aabbeb10b9accf6e143e00834a885f7';
+  const API_KEY = import.meta.env.VITE_WEATHER_KEY;
+
 
   useEffect(() => {
     const savedFavorites = localStorage.getItem('favoriteCities');
