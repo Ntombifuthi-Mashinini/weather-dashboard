@@ -4,21 +4,22 @@ function App() {
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [city, setCity] = useState('Durban');
+  const [searchInput, setSearchInput] = useState('');
 
   const API_KEY = '1aabbeb10b9accf6e143e00834a885f7';
-  const CITY = 'Durban';
 
   useEffect(() => {
-    fetchWeather();
+    fetchWeather(city);
   }, []);
 
-  const fetchWeather = async () => {
+  const fetchWeather = async (cityName) => {
     try {
       setLoading(true);
       setError(null);
       
       const response = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${CITY}&appid=${API_KEY}&units=metric`
+        `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${API_KEY}&units=metric`
       );
       
       if (!response.ok) {
@@ -27,10 +28,19 @@ function App() {
       
       const data = await response.json();
       setWeather(data);
+      setCity(cityName);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchInput.trim()) {
+      fetchWeather(searchInput.trim());
+      setSearchInput('');
     }
   };
 
@@ -41,6 +51,26 @@ function App() {
           Weather Dashboard
         </h1>
         
+        {/* Search Box */}
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+          <form onSubmit={handleSearch} className="flex gap-2">
+            <input
+              type="text"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="Search for a city..."
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              type="submit"
+              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Search
+            </button>
+          </form>
+        </div>
+
+      
         <div className="bg-white rounded-lg shadow-lg p-6">
           {loading && (
             <p className="text-gray-600 text-center">Loading weather data...</p>
