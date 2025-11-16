@@ -8,6 +8,7 @@ function App() {
   const [searchInput, setSearchInput] = useState('');
   const [favorites, setFavorites] = useState([]);
   const [gettingLocation, setGettingLocation] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
 
   const API_KEY = '1aabbeb10b9accf6e143e00834a885f7';
 
@@ -16,8 +17,20 @@ function App() {
     if (savedFavorites) {
       setFavorites(JSON.parse(savedFavorites));
     }
+    
+    const savedDarkMode = localStorage.getItem('darkMode');
+    if (savedDarkMode) {
+      setDarkMode(JSON.parse(savedDarkMode));
+    }
+    
     fetchWeatherData('Durban');
   }, []);
+
+  const toggleDarkMode = () => {
+    const newDarkMode = !darkMode;
+    setDarkMode(newDarkMode);
+    localStorage.setItem('darkMode', JSON.stringify(newDarkMode));
+  };
 
   const fetchWeatherData = async (cityName) => {
     try {
@@ -157,14 +170,28 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 to-blue-600 p-8">
+    <div className={`min-h-screen p-8 transition-colors duration-300 ${
+      darkMode 
+        ? 'bg-gradient-to-br from-gray-900 to-gray-800' 
+        : 'bg-gradient-to-br from-blue-400 to-blue-600'
+    }`}>
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-white text-center mb-8">
-          Weather Dashboard
-        </h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold text-white text-center flex-1">
+            Weather Dashboard
+          </h1>
+          <button
+            onClick={toggleDarkMode}
+            className="px-4 py-2 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-all"
+          >
+            {darkMode ? '☀️ Light' : '🌙 Dark'}
+          </button>
+        </div>
         
-  
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+    
+        <div className={`rounded-lg shadow-lg p-6 mb-6 ${
+          darkMode ? 'bg-gray-800' : 'bg-white'
+        }`}>
           <div className="flex gap-2 mb-4">
             <form onSubmit={handleSearch} className="flex gap-2 flex-1">
               <input
@@ -172,7 +199,11 @@ function App() {
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Search for a city..."
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  darkMode 
+                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                    : 'bg-white border-gray-300 text-gray-900'
+                }`}
               />
               <button
                 type="submit"
@@ -190,16 +221,22 @@ function App() {
             </button>
           </div>
 
-      
+        
           {favorites.length > 0 && (
             <div>
-              <p className="text-sm text-gray-600 mb-2">Favorite Cities:</p>
+              <p className={`text-sm mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                Favorite Cities:
+              </p>
               <div className="flex flex-wrap gap-2">
                 {favorites.map((fav, index) => (
-                  <div key={index} className="flex items-center gap-1 bg-blue-100 px-3 py-1 rounded-full">
+                  <div key={index} className={`flex items-center gap-1 px-3 py-1 rounded-full ${
+                    darkMode ? 'bg-blue-900 bg-opacity-50' : 'bg-blue-100'
+                  }`}>
                     <button
                       onClick={() => fetchWeatherData(fav)}
-                      className="text-blue-700 hover:text-blue-900 font-medium"
+                      className={`font-medium ${
+                        darkMode ? 'text-blue-300 hover:text-blue-100' : 'text-blue-700 hover:text-blue-900'
+                      }`}
                     >
                       {fav}
                     </button>
@@ -216,10 +253,14 @@ function App() {
           )}
         </div>
 
-    
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+        
+        <div className={`rounded-lg shadow-lg p-6 mb-6 ${
+          darkMode ? 'bg-gray-800' : 'bg-white'
+        }`}>
           {loading && (
-            <p className="text-gray-600 text-center">Loading weather data...</p>
+            <p className={`text-center ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              Loading weather data...
+            </p>
           )}
           
           {error && (
@@ -232,7 +273,9 @@ function App() {
                 <div className="text-8xl mb-4">
                   {getWeatherIcon(weather.weather[0].main)}
                 </div>
-                <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                <h2 className={`text-3xl font-bold mb-2 ${
+                  darkMode ? 'text-white' : 'text-gray-800'
+                }`}>
                   {weather.name}, {weather.sys.country}
                 </h2>
                 <button
@@ -249,30 +292,46 @@ function App() {
                 <p className="text-6xl font-bold text-blue-600 my-4">
                   {Math.round(weather.main.temp)}°C
                 </p>
-                <p className="text-xl text-gray-600 capitalize mb-2">
+                <p className={`text-xl capitalize mb-2 ${
+                  darkMode ? 'text-gray-300' : 'text-gray-600'
+                }`}>
                   {weather.weather[0].description}
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                   Feels like {Math.round(weather.main.feels_like)}°C
                 </p>
               </div>
 
-              <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t">
+              <div className={`grid grid-cols-3 gap-4 mt-6 pt-6 border-t ${
+                darkMode ? 'border-gray-700' : 'border-gray-200'
+              }`}>
                 <div className="text-center">
-                  <p className="text-gray-500 text-sm">Humidity</p>
-                  <p className="text-2xl font-semibold text-gray-800">
+                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Humidity
+                  </p>
+                  <p className={`text-2xl font-semibold ${
+                    darkMode ? 'text-white' : 'text-gray-800'
+                  }`}>
                     {weather.main.humidity}%
                   </p>
                 </div>
                 <div className="text-center">
-                  <p className="text-gray-500 text-sm">Wind Speed</p>
-                  <p className="text-2xl font-semibold text-gray-800">
+                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Wind Speed
+                  </p>
+                  <p className={`text-2xl font-semibold ${
+                    darkMode ? 'text-white' : 'text-gray-800'
+                  }`}>
                     {weather.wind.speed} m/s
                   </p>
                 </div>
                 <div className="text-center">
-                  <p className="text-gray-500 text-sm">Pressure</p>
-                  <p className="text-2xl font-semibold text-gray-800">
+                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Pressure
+                  </p>
+                  <p className={`text-2xl font-semibold ${
+                    darkMode ? 'text-white' : 'text-gray-800'
+                  }`}>
                     {weather.main.pressure} hPa
                   </p>
                 </div>
@@ -283,14 +342,22 @@ function App() {
 
       
         {forecast && !loading && (
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">
+          <div className={`rounded-lg shadow-lg p-6 ${
+            darkMode ? 'bg-gray-800' : 'bg-white'
+          }`}>
+            <h3 className={`text-2xl font-bold mb-4 ${
+              darkMode ? 'text-white' : 'text-gray-800'
+            }`}>
               5-Day Forecast
             </h3>
             <div className="grid grid-cols-5 gap-4">
               {getDailyForecasts().map((day, index) => (
-                <div key={index} className="text-center p-3 bg-blue-50 rounded-lg">
-                  <p className="font-semibold text-gray-700 mb-2">
+                <div key={index} className={`text-center p-3 rounded-lg ${
+                  darkMode ? 'bg-gray-700' : 'bg-blue-50'
+                }`}>
+                  <p className={`font-semibold mb-2 ${
+                    darkMode ? 'text-gray-300' : 'text-gray-700'
+                  }`}>
                     {formatDate(day.dt)}
                   </p>
                   <div className="text-4xl my-2">
@@ -299,7 +366,9 @@ function App() {
                   <p className="text-2xl font-bold text-blue-600 my-2">
                     {Math.round(day.main.temp)}°C
                   </p>
-                  <p className="text-xs text-gray-600 capitalize">
+                  <p className={`text-xs capitalize ${
+                    darkMode ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
                     {day.weather[0].description}
                   </p>
                 </div>
