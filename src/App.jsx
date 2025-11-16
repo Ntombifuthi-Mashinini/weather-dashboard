@@ -52,6 +52,20 @@ function App() {
     }
   };
 
+
+  const getWeatherIcon = (weatherCondition) => {
+    const condition = weatherCondition.toLowerCase();
+    
+    if (condition.includes('clear')) return '☀️';
+    if (condition.includes('cloud')) return '☁️';
+    if (condition.includes('rain')) return '🌧️';
+    if (condition.includes('drizzle')) return '🌦️';
+    if (condition.includes('thunder')) return '⛈️';
+    if (condition.includes('snow')) return '❄️';
+    if (condition.includes('mist') || condition.includes('fog')) return '🌫️';
+    return '🌤️';
+  };
+
   const getDailyForecasts = () => {
     if (!forecast) return [];
     
@@ -83,6 +97,7 @@ function App() {
           Weather Dashboard
         </h1>
         
+      
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <form onSubmit={handleSearch} className="flex gap-2">
             <input
@@ -101,6 +116,7 @@ function App() {
           </form>
         </div>
 
+      
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           {loading && (
             <p className="text-gray-600 text-center">Loading weather data...</p>
@@ -113,6 +129,9 @@ function App() {
           {weather && !loading && (
             <div>
               <div className="text-center mb-6">
+                <div className="text-8xl mb-4">
+                  {getWeatherIcon(weather.weather[0].main)}
+                </div>
                 <h2 className="text-3xl font-bold text-gray-800 mb-2">
                   {weather.name}, {weather.sys.country}
                 </h2>
@@ -162,7 +181,10 @@ function App() {
                   <p className="font-semibold text-gray-700 mb-2">
                     {formatDate(day.dt)}
                   </p>
-                  <p className="text-3xl font-bold text-blue-600 my-2">
+                  <div className="text-4xl my-2">
+                    {getWeatherIcon(day.weather[0].main)}
+                  </div>
+                  <p className="text-2xl font-bold text-blue-600 my-2">
                     {Math.round(day.main.temp)}°C
                   </p>
                   <p className="text-xs text-gray-600 capitalize">
