@@ -5,19 +5,18 @@ function App() {
   const [forecast, setForecast] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [city, setCity] = useState('Durban');
   const [searchInput, setSearchInput] = useState('');
   const [favorites, setFavorites] = useState([]);
+  const [gettingLocation, setGettingLocation] = useState(false);
 
   const API_KEY = '1aabbeb10b9accf6e143e00834a885f7';
 
   useEffect(() => {
-
     const savedFavorites = localStorage.getItem('favoriteCities');
     if (savedFavorites) {
       setFavorites(JSON.parse(savedFavorites));
     }
-    fetchWeatherData(city);
+    fetchWeatherData('Durban');
   }, []);
 
   const fetchWeatherData = async (cityName) => {
@@ -42,12 +41,60 @@ function App() {
       
       const forecastData = await forecastResponse.json();
       setForecast(forecastData);
-      setCity(cityName);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchWeatherByCoords = async (lat, lon) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const weatherResponse = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
+      );
+      
+      if (!weatherResponse.ok) {
+        throw new Error('Location not found');
+      }
+      
+      const weatherData = await weatherResponse.json();
+      setWeather(weatherData);
+      
+      const forecastResponse = await fetch(
+        `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
+      );
+      
+      const forecastData = await forecastResponse.json();
+      setForecast(forecastData);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+      setGettingLocation(false);
+    }
+  };
+
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      setError('Geolocation is not supported by your browser');
+      return;
+    }
+
+    setGettingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        fetchWeatherByCoords(latitude, longitude);
+      },
+      () => {
+        setGettingLocation(false);
+        setError('Unable to retrieve your location');
+      }
+    );
   };
 
   const handleSearch = (e) => {
@@ -116,24 +163,34 @@ function App() {
           Weather Dashboard
         </h1>
         
+  
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <form onSubmit={handleSearch} className="flex gap-2 mb-4">
-            <input
-              type="text"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Search for a city..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+          <div className="flex gap-2 mb-4">
+            <form onSubmit={handleSearch} className="flex gap-2 flex-1">
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Search for a city..."
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="submit"
+                className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                Search
+              </button>
+            </form>
             <button
-              type="submit"
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              onClick={handleUseMyLocation}
+              disabled={gettingLocation}
+              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400"
             >
-              Search
+              {gettingLocation ? '📍...' : '📍 My Location'}
             </button>
-          </form>
+          </div>
 
-          
+      
           {favorites.length > 0 && (
             <div>
               <p className="text-sm text-gray-600 mb-2">Favorite Cities:</p>
@@ -159,7 +216,7 @@ function App() {
           )}
         </div>
 
-      
+    
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           {loading && (
             <p className="text-gray-600 text-center">Loading weather data...</p>
@@ -224,7 +281,7 @@ function App() {
           )}
         </div>
 
-    
+      
         {forecast && !loading && (
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h3 className="text-2xl font-bold text-gray-800 mb-4">
