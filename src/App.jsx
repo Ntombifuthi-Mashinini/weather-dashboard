@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 
 function App() {
   const [weather, setWeather] = useState(null);
+  const [forecast, setForecast] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [city, setCity] = useState('Durban');
@@ -10,24 +11,31 @@ function App() {
   const API_KEY = '1aabbeb10b9accf6e143e00834a885f7';
 
   useEffect(() => {
-    fetchWeather(city);
+    fetchWeatherData(city);
   }, []);
 
-  const fetchWeather = async (cityName) => {
+  const fetchWeatherData = async (cityName) => {
     try {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(
+      const weatherResponse = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${API_KEY}&units=metric`
       );
       
-      if (!response.ok) {
+      if (!weatherResponse.ok) {
         throw new Error('City not found');
       }
       
-      const data = await response.json();
-      setWeather(data);
+      const weatherData = await weatherResponse.json();
+      setWeather(weatherData);
+      
+      const forecastResponse = await fetch(
+        `https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&appid=${API_KEY}&units=metric`
+      );
+      
+      const forecastData = await forecastResponse.json();
+      setForecast(forecastData);
       setCity(cityName);
     } catch (err) {
       setError(err.message);
@@ -39,9 +47,33 @@ function App() {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchInput.trim()) {
-      fetchWeather(searchInput.trim());
+      fetchWeatherData(searchInput.trim());
       setSearchInput('');
     }
+  };
+
+  const getDailyForecasts = () => {
+    if (!forecast) return [];
+    
+    const dailyData = [];
+    const processedDates = new Set();
+    
+    forecast.list.forEach(item => {
+      const date = new Date(item.dt * 1000).toLocaleDateString();
+      
+      if (!processedDates.has(date) && dailyData.length < 5) {
+        processedDates.add(date);
+        dailyData.push(item);
+      }
+    });
+    
+    return dailyData;
+  };
+
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp * 1000);
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    return days[date.getDay()];
   };
 
   return (
@@ -51,7 +83,6 @@ function App() {
           Weather Dashboard
         </h1>
         
-        {/* Search Box */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <form onSubmit={handleSearch} className="flex gap-2">
             <input
@@ -70,8 +101,7 @@ function App() {
           </form>
         </div>
 
-      
-        <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           {loading && (
             <p className="text-gray-600 text-center">Loading weather data...</p>
           )}
@@ -120,6 +150,29 @@ function App() {
             </div>
           )}
         </div>
+
+        {forecast && !loading && (
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h3 className="text-2xl font-bold text-gray-800 mb-4">
+              5-Day Forecast
+            </h3>
+            <div className="grid grid-cols-5 gap-4">
+              {getDailyForecasts().map((day, index) => (
+                <div key={index} className="text-center p-3 bg-blue-50 rounded-lg">
+                  <p className="font-semibold text-gray-700 mb-2">
+                    {formatDate(day.dt)}
+                  </p>
+                  <p className="text-3xl font-bold text-blue-600 my-2">
+                    {Math.round(day.main.temp)}°C
+                  </p>
+                  <p className="text-xs text-gray-600 capitalize">
+                    {day.weather[0].description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
