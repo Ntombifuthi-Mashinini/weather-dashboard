@@ -7,10 +7,16 @@ function App() {
   const [error, setError] = useState(null);
   const [city, setCity] = useState('Durban');
   const [searchInput, setSearchInput] = useState('');
+  const [favorites, setFavorites] = useState([]);
 
   const API_KEY = '1aabbeb10b9accf6e143e00834a885f7';
 
   useEffect(() => {
+
+    const savedFavorites = localStorage.getItem('favoriteCities');
+    if (savedFavorites) {
+      setFavorites(JSON.parse(savedFavorites));
+    }
     fetchWeatherData(city);
   }, []);
 
@@ -52,6 +58,19 @@ function App() {
     }
   };
 
+  const addToFavorites = () => {
+    if (weather && !favorites.includes(weather.name)) {
+      const newFavorites = [...favorites, weather.name];
+      setFavorites(newFavorites);
+      localStorage.setItem('favoriteCities', JSON.stringify(newFavorites));
+    }
+  };
+
+  const removeFromFavorites = (cityName) => {
+    const newFavorites = favorites.filter(fav => fav !== cityName);
+    setFavorites(newFavorites);
+    localStorage.setItem('favoriteCities', JSON.stringify(newFavorites));
+  };
 
   const getWeatherIcon = (weatherCondition) => {
     const condition = weatherCondition.toLowerCase();
@@ -97,9 +116,8 @@ function App() {
           Weather Dashboard
         </h1>
         
-      
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <form onSubmit={handleSearch} className="flex gap-2">
+          <form onSubmit={handleSearch} className="flex gap-2 mb-4">
             <input
               type="text"
               value={searchInput}
@@ -114,6 +132,31 @@ function App() {
               Search
             </button>
           </form>
+
+          
+          {favorites.length > 0 && (
+            <div>
+              <p className="text-sm text-gray-600 mb-2">Favorite Cities:</p>
+              <div className="flex flex-wrap gap-2">
+                {favorites.map((fav, index) => (
+                  <div key={index} className="flex items-center gap-1 bg-blue-100 px-3 py-1 rounded-full">
+                    <button
+                      onClick={() => fetchWeatherData(fav)}
+                      className="text-blue-700 hover:text-blue-900 font-medium"
+                    >
+                      {fav}
+                    </button>
+                    <button
+                      onClick={() => removeFromFavorites(fav)}
+                      className="text-red-500 hover:text-red-700 font-bold"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
       
@@ -135,6 +178,17 @@ function App() {
                 <h2 className="text-3xl font-bold text-gray-800 mb-2">
                   {weather.name}, {weather.sys.country}
                 </h2>
+                <button
+                  onClick={addToFavorites}
+                  disabled={favorites.includes(weather.name)}
+                  className={`mb-4 px-4 py-2 rounded-lg transition-colors ${
+                    favorites.includes(weather.name)
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-yellow-400 text-yellow-900 hover:bg-yellow-500'
+                  }`}
+                >
+                  {favorites.includes(weather.name) ? '★ Saved' : '☆ Add to Favorites'}
+                </button>
                 <p className="text-6xl font-bold text-blue-600 my-4">
                   {Math.round(weather.main.temp)}°C
                 </p>
@@ -170,6 +224,7 @@ function App() {
           )}
         </div>
 
+    
         {forecast && !loading && (
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h3 className="text-2xl font-bold text-gray-800 mb-4">
