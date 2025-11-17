@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useWeather } from '../hooks/useWeather';
 import { SearchBar } from '../components/SearchBar';
 import { WeatherCard } from '../components/WeatherCard';
@@ -21,11 +21,15 @@ export const Dashboard = () => {
   } = useWeather();
 
   const [gettingLocation, setGettingLocation] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    // Load default city on mount
-    getWeatherByCity('Durban');
-  }, [getWeatherByCity]);
+    // Only load default city once on mount
+    if (!initialized) {
+      getWeatherByCity('Durban');
+      setInitialized(true);
+    }
+  }, [initialized, getWeatherByCity]);
 
   const handleSearch = async (cityName) => {
     try {
