@@ -7,18 +7,17 @@ import { Favorites } from './pages/Favorites';
 import { CityDetail } from './pages/CityDetail';
 import { Settings } from './pages/Settings';
 
-// Layout wrapper to access context
 function AppLayout() {
   const { darkMode } = useWeather();
 
   return (
-    <div className={`min-h-screen p-8 transition-colors duration-300 ${
+    <div className={`min-h-screen p-4 md:p-8 transition-colors duration-300 ${
       darkMode 
         ? 'bg-gradient-to-br from-gray-900 to-gray-800' 
         : 'bg-gradient-to-br from-blue-400 to-blue-600'
     }`}>
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold text-white text-center mb-8">
+        <h1 className="text-3xl md:text-4xl font-bold text-white text-center mb-6 md:mb-8">
           Weather Dashboard
         </h1>
         
