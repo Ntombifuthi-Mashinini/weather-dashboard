@@ -29,6 +29,10 @@ function AppLayout() {
           <Route path="/city/:cityName" element={<CityDetail />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
+
+        <footer className="text-center mt-10 text-sm text-gray-300">
+          NtombifuthiTheDev
+        </footer>
       </div>
     </div>
   );
